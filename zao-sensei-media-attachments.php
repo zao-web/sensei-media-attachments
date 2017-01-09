@@ -1,32 +1,20 @@
 <?php
 /*
- * Plugin Name: Sensei Media Attachments
- * Version: 1.0.0
- * Plugin URI: http://www.woothemes.com/
- * Description: Enhance your lessons by attaching media files to lessons and courses in Sensei
- * Author: WooThemes
- * Author URI: http://www.woothemes.com/
- * Requires at least: 3.5
- * Tested up to: 3.8
+ * Plugin Name: Zao Sensei Media Attachments
+ * Version: 1.1.0
+ * Plugin URI: http://zao.is
+ * Description: Enhance your lessons by attaching media files to lessons and courses in Sensei. Requires the CMB2 plugin.
+ * Author: Zao
+ * Author URI: http://zao.is
+ * Requires at least: 3.8
+ * Tested up to: 4.7
  *
  * @package WordPress
- * @author WooThemes
+ * @author Zao
  * @since 1.0.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) exit;
-
-/**
- * Required functions
- */
-if ( ! function_exists( 'woothemes_queue_update' ) ) {
-	require_once( 'woo-includes/woo-functions.php' );
-}
-
-/**
- * Plugin updates
- */
-woothemes_queue_update( plugin_basename( __FILE__ ), '788647a9a1d8ef5c95371f0e69223a0f', '290551' );
 
 /**
  * Functions used by plugins
@@ -44,9 +32,37 @@ if ( ! function_exists( 'is_sensei_active' ) ) {
   }
 }
 
-if( is_sensei_active() ) {
-	require_once( 'classes/class-sensei-media-attachments.php' );
+if ( ! is_sensei_active() ) {
+	add_action( 'all_admin_notices', 'zao_sensei_media_attachments_requires_sensei' );
+} else {
+	require_once( 'classes/class-zao-sensei-media-attachments.php' );
+	add_action( 'plugins_loaded', array( 'Zao_Sensei_Media_Attachments', 'get_instance' ) );
+}
 
-	global $sensei_media_attachments;
-	$sensei_media_attachments = new Sensei_Media_Attachments( __FILE__ );
+
+/**
+ * Load localisation
+ * @return void
+ */
+function zao_sensei_media_attachments_load_localisation () {
+	load_plugin_textdomain( 'zao_sensei_media_attachments', false, dirname( plugin_basename( __FILE__ ) ) . '/lang/' );
+}
+add_action( 'init', 'zao_sensei_media_attachments_load_localisation', 0 );
+
+/**
+ * Load plguin textdomain
+ * @return void
+ */
+function zao_sensei_media_attachments_load_plugin_textdomain () {
+	$domain = 'zao_sensei_media_attachments';
+
+	$locale = apply_filters( 'plugin_locale' , get_locale() , $domain );
+
+	load_textdomain( $domain, WP_LANG_DIR . '/' . $domain . '/' . $domain . '-' . $locale . '.mo' );
+	load_plugin_textdomain( $domain, false, dirname( plugin_basename( __FILE__ ) ) . '/lang/' );
+}
+add_action( 'plugins_loaded', 'zao_sensei_media_attachments_load_plugin_textdomain' );
+
+function zao_sensei_media_attachments_requires_sensei() {
+	echo '<div id="message" class="error">' . __( 'Zao Sensei Media Attachments requires the Sensei plugin to be installed/active.', 'zao_sensei_media_attachments' ) . '<p>';
 }

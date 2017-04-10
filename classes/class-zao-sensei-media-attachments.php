@@ -89,7 +89,7 @@ class Zao_Sensei_Media_Attachments {
 		$media = get_post_meta( $post_id, '_attached_media', true );
 		$should_show = apply_filters( 'zao_sensei_media_attachments_should_show', is_user_logged_in() );
 
-		if ( empty( $media ) || ! is_array( $media ) ) {
+		if ( ! $should_show || empty( $media ) || ! is_array( $media ) ) {
 			return '';
 		}
 

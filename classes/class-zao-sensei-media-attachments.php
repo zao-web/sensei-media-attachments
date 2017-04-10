@@ -85,9 +85,20 @@ class Zao_Sensei_Media_Attachments {
 	 * @return void
 	 */
 	public function get_attached_media( $post_id = 0 ) {
-		$post_id = $post_id ? $post_id : get_the_ID();
+		$post_id = absint( $post_id );
+		if ( ! $post_id ) {
+			$post_id = get_the_ID();
+		}
+
 		$media = get_post_meta( $post_id, '_attached_media', true );
-		$should_show = apply_filters( 'zao_sensei_media_attachments_should_show', is_user_logged_in() );
+
+		$course_id = $post_id;
+		if ( 'lesson' === get_post_type( $post_id ) ) {
+			$course_id = Sensei()->lesson->get_course_id( $post_id );
+		}
+
+		$should_show = Sensei_Utils::user_started_course( $course_id );
+		$should_show = apply_filters( 'zao_sensei_media_attachments_should_show', $should_show );
 
 		if ( ! $should_show || empty( $media ) || ! is_array( $media ) ) {
 			return '';
